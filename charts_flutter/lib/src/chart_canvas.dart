@@ -74,6 +74,7 @@ class ChartCanvas implements common.ChartCanvas {
       Rectangle<num> clipBounds,
       common.Color fill,
       common.Color stroke,
+        bool smoothLine,
       bool roundEndCaps,
       double strokeWidthPx,
       List<int> dashPattern}) {
@@ -85,6 +86,7 @@ class ChartCanvas implements common.ChartCanvas {
         clipBounds: clipBounds,
         fill: fill,
         stroke: stroke,
+        smoothLine: smoothLine,
         roundEndCaps: roundEndCaps,
         strokeWidthPx: strokeWidthPx,
         dashPattern: dashPattern);
@@ -120,7 +122,8 @@ class ChartCanvas implements common.ChartCanvas {
       Rectangle<num> clipBounds,
       common.Color fill,
       common.Color stroke,
-      double strokeWidthPx}) {
+      double strokeWidthPx,
+        bool smoothLine = false}) {
     _polygonPainter ??= new PolygonPainter();
     _polygonPainter.draw(
         canvas: canvas,
@@ -129,7 +132,8 @@ class ChartCanvas implements common.ChartCanvas {
         clipBounds: clipBounds,
         fill: fill,
         stroke: stroke,
-        strokeWidthPx: strokeWidthPx);
+        strokeWidthPx: strokeWidthPx,
+        smoothLine: smoothLine);
   }
 
   /// Creates a bottom to top gradient that transitions [fill] to transparent.
@@ -168,7 +172,9 @@ class ChartCanvas implements common.ChartCanvas {
         _drawForwardHatchPattern(fillRectBounds, canvas,
             fill: fill, drawAreaBounds: drawAreaBounds);
         break;
-
+      case common.FillPatternType.gradient:
+        _drawGradientPattern(fillRectBounds, canvas, fill: fill);
+        break;
       case common.FillPatternType.solid:
       default:
         // Use separate rect for drawing stroke
@@ -439,6 +445,26 @@ class ChartCanvas implements common.ChartCanvas {
           strokeWidthPx: fillWidthPx,
           shader: lineShader);
     }
+  }
+
+  _drawGradientPattern(
+    Rectangle<num> bounds,
+        Canvas canvas, {
+        common.Color background,
+        common.Color fill,}) {
+        background ??= common.StyleFactory.style.white;
+    fill ??= common.StyleFactory.style.black;
+    // TODO clean this up
+    _paint.style = PaintingStyle.fill;
+    var gradient = new LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+    new Color.fromARGB(fill.a, fill.r, fill.g, fill.b),
+      new Color.fromARGB(25, fill.r, fill.g, fill.b)
+    ]);
+    _paint.shader = gradient.createShader(_getRect(bounds));
+    canvas.drawRect(_getRect(bounds), _paint);
   }
 
   @override

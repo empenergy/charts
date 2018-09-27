@@ -57,6 +57,7 @@ abstract class ChartCanvas {
       Rectangle<num> clipBounds,
       Color fill,
       Color stroke,
+        bool smoothLine,
       bool roundEndCaps,
       double strokeWidthPx,
       List<int> dashPattern});
@@ -97,7 +98,8 @@ abstract class ChartCanvas {
       Rectangle<num> clipBounds,
       Color fill,
       Color stroke,
-      double strokeWidthPx});
+      double strokeWidthPx,
+        bool smoothLine});
 
   /// Renders a simple rectangle.
   ///
@@ -164,4 +166,4 @@ Color getAnimatedColor(Color previous, Color target, double animationPercent) {
 ///   on top of a bar filled with the fill color.
 /// * [solid] defines a simple bar filled with the fill color. This is the
 ///   default pattern for bars.
-enum FillPatternType { forwardHatch, solid }
+enum FillPatternType { forwardHatch, solid, gradient }
