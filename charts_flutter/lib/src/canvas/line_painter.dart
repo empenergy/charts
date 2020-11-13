@@ -17,6 +17,7 @@ import 'dart:ui' as ui show Shader;
 import 'dart:math' show Point, Rectangle;
 import 'package:flutter/material.dart';
 import 'package:charts_common/common.dart' as common show Color;
+import 'package:charts_flutter/src/util/monotonex.dart';
 
 /// Draws a simple line.
 ///
@@ -38,6 +39,7 @@ class LinePainter {
       Rectangle<num> clipBounds,
       common.Color fill,
       common.Color stroke,
+        bool smoothLine,
       bool roundEndCaps,
       double strokeWidthPx,
       List<int> dashPattern,
@@ -74,7 +76,9 @@ class LinePainter {
       paint.strokeJoin = StrokeJoin.round;
       paint.style = PaintingStyle.stroke;
 
-      if (dashPattern == null || dashPattern.isEmpty) {
+      if (smoothLine ?? false) {
+        _drawSmoothLine(canvas, paint, points);
+      } else if (dashPattern == null || dashPattern.isEmpty) {
         if (roundEndCaps == true) {
           paint.strokeCap = StrokeCap.round;
         }
@@ -89,6 +93,15 @@ class LinePainter {
       canvas.restore();
     }
   }
+
+  /// Draws smooth lines between each point.
+  void _drawSmoothLine(Canvas canvas, Paint paint, List<Point> points) {
+    final path = new Path()
+      ..moveTo(points.first.x.toDouble(), points.first.y.toDouble());
+    MonotoneX.addCurve(path, points);
+    canvas.drawPath(path, paint);
+  }
+
 
   /// Draws solid lines between each point.
   void _drawSolidLine(Canvas canvas, Paint paint, List<Point> points) {
